@@ -21,7 +21,7 @@ export class UsersService {
     return user.save();
   }
 
-  async findByEmail(email: string): Promise<UserDocument> {
+  async findByEmail(email: string): Promise<UserDocument | null> {
     return this.userModel.findOne({ email });
   }
 
@@ -38,7 +38,8 @@ export class UsersService {
   async update(id: string, data: Partial<User>): Promise<UserDocument> {
     return this.userModel
       .findByIdAndUpdate(id, data, { new: true })
-      .select('-password');
+      .select('-password')
+      .exec() as Promise<UserDocument>;
   }
 
   async remove(id: string): Promise<void> {
