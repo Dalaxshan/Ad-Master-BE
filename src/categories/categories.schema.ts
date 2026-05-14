@@ -7,7 +7,7 @@ export type CategoryDocument = Category & Document;
 export class Subcategory {
   @Prop({ required: true }) subcategoryName: string;
   @Prop({ required: true }) subcategorySlug: string;
-}       
+}
 
 @Schema({ timestamps: true })
 export class Category {

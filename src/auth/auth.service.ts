@@ -26,6 +26,8 @@ export class AuthService {
     if (!user) throw new UnauthorizedException('Invalid credentials');
     const valid = await bcrypt.compare(dto.password, user.password);
     if (!valid) throw new UnauthorizedException('Invalid credentials');
+    if (!user.isVerified) throw new UnauthorizedException('Email not verified');
+
     const token = this.signToken(user._id.toString(), user.email, user.role);
     return {
       token,
