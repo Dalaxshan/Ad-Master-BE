@@ -5,10 +5,18 @@ export type AdDocument = Ad & Document;
 
 @Schema()
 export class BoostAd {
+  @Prop() boost: string;
+  @Prop() startDate: Date;
+  @Prop() endDate: Date;
+  @Prop() boostCharge: number;
+}
+
+@Schema()
+export class PlanAd{
   @Prop() plan: string;
   @Prop() startDate: Date;
   @Prop() endDate: Date;
-  @Prop() amount: number;
+  @Prop() planCharge: number;
 }
 
 @Schema({ timestamps: true })
@@ -22,8 +30,8 @@ export class Ad {
     url: string;
     publicId: string;
   }[];
-  @Prop() plan: string;
-  @Prop({ type: [BoostAd], default: [] }) boostAd: BoostAd[];
+  @Prop() plan: PlanAd;
+  @Prop({ type: [BoostAd], default: [] }) boostAds: BoostAd[];
   @Prop({ default: 0 }) totalAmount: number;
   @Prop() location: string;
   @Prop() district: string;

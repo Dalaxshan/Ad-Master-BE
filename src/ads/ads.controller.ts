@@ -15,7 +15,6 @@ import {
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { AdsService } from './ads.service';
 import { CreateAdDto } from './dto/create-ad.dto';
-
 import { memoryStorage } from 'multer';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth-guard';
 
@@ -41,7 +40,7 @@ export class AdsController {
     @UploadedFiles() files: Express.Multer.File[],
     @Req() req,
   ) {
-    return this.adsService.create(dto, files || [], req.user.userId);
+    return this.adsService.create(dto, files || [], '6a054a43d2c284c9bb07eea0');
   }
 
   @Patch(':id')
