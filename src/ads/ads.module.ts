@@ -5,6 +5,7 @@ import { AdsController } from './ads.controller';
 import { CloudinaryModule } from '../cloudinary/cloudinary.module';
 import { Ad, AdSchema } from './ads.schema';
 import { User, UserSchema } from 'src/users/users.schema';
+import { OrdersModule } from 'src/orders/orders.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { User, UserSchema } from 'src/users/users.schema';
       { name: User.name, schema: UserSchema },
     ]),
     CloudinaryModule,
+    OrdersModule,
   ],
   providers: [AdsService],
   controllers: [AdsController],

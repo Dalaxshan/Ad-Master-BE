@@ -9,6 +9,7 @@ import { Ad, AdDocument } from './ads.schema';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
 import { CreateAdDto } from './dto/create-ad.dto';
 import { User, UserDocument } from 'src/users/users.schema';
+import { OrdersService } from 'src/orders/orders.service';
 
 @Injectable()
 export class AdsService {
@@ -16,6 +17,7 @@ export class AdsService {
     @InjectModel(Ad.name) private adModel: Model<AdDocument>,
     @InjectModel(User.name) private userModel: Model<UserDocument>,
     private cloudinaryService: CloudinaryService,
+    private ordersService: OrdersService,
   ) {}
 
   async create(
@@ -43,6 +45,8 @@ export class AdsService {
       $push: { ads: ad._id },
     });
 
+    await this.ordersService.create(ad._id.toString(), sellerId);
+
     return ad;
   }
 
@@ -69,7 +73,9 @@ export class AdsService {
     if (!ad) throw new NotFoundException('Ad not found');
     if (ad.seller.toString() !== userId && role !== 'admin')
       throw new ForbiddenException();
-    return this.adModel.findByIdAndUpdate(id, data, { new: true });
+    return this.adModel.findByIdAndUpdate(id, data, {
+      returnDocument: 'after',
+    });
   }
 
   async remove(id: string, userId: string, role: string) {
@@ -98,7 +104,7 @@ export class AdsService {
         $push: { boostAds: boostData },
         $inc: { totalAmount: boostData.amount },
       },
-      { new: true },
+      { returnDocument: 'after' },
     );
   }
 
@@ -116,7 +122,7 @@ export class AdsService {
     const updatedAd = await this.adModel.findByIdAndUpdate(
       adId,
       { totalAmount: totalCharge },
-      { new: true },
+      { returnDocument: 'after' },
     );
     return updatedAd?.totalAmount;
   }

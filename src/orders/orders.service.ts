@@ -33,7 +33,7 @@ export class OrdersService {
     return this.orderModel.findByIdAndUpdate(
       id,
       { payment: status },
-      { new: true },
+      { returnDocument: 'after' },
     );
   }
 }
