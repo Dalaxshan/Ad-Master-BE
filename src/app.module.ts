@@ -3,10 +3,10 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
-import { CloudinaryModule } from './cloudinary/cloudinary.module';
-import { CategoriesModule } from './categories/categories.module';
 import { AdsModule } from './ads/ads.module';
+import { CategoriesModule } from './categories/categories.module';
 import { OrdersModule } from './orders/orders.module';
+import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { AdminModule } from './admin/admin.module';
 
 @Module({
@@ -20,10 +20,10 @@ import { AdminModule } from './admin/admin.module';
     }),
     AuthModule,
     UsersModule,
-    CloudinaryModule,
-    CategoriesModule,
     AdsModule,
+    CategoriesModule,
     OrdersModule,
+    CloudinaryModule,
     AdminModule,
   ],
 })
