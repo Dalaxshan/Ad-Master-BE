@@ -28,8 +28,12 @@ export class AdsService {
     const images = await Promise.all(
       files.map((f) => this.cloudinaryService.uploadImage(f)),
     );
+
+    const adSlug = this.createAdSlug(dto.title);
+
     const ad = await this.adModel.create({
       ...dto,
+      adSlug: adSlug,
       boostAds: dto.boostAds,
       seller: sellerId,
       images: images
@@ -53,6 +57,7 @@ export class AdsService {
   findAll(query: any = {}) {
     const filter: any = {};
     if (query.category) filter.category = query.category;
+    if (query.adSlug) filter.adSlug = query.adSlug;
     if (query.district) filter.district = query.district;
     if (query.subcategory) filter.subcategory = query.subcategory;
     if (query.search) filter.title = { $regex: query.search, $options: 'i' };
@@ -62,8 +67,10 @@ export class AdsService {
       .sort({ createdAt: -1 });
   }
 
-  async findOne(id: string) {
-    const ad = await this.adModel.findById(id).populate('seller', '-password');
+  async findOneBySlug(slug: string) {
+    const ad = await this.adModel
+      .findOne({ adSlug: slug })
+      .populate('seller', '-password');
     if (!ad) throw new NotFoundException('Ad not found');
     return ad;
   }
@@ -125,5 +132,12 @@ export class AdsService {
       { returnDocument: 'after' },
     );
     return updatedAd?.totalAmount;
+  }
+
+  createAdSlug(title: string) {
+    return title
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '');
   }
 }

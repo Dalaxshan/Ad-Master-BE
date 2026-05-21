@@ -22,6 +22,7 @@ export class PlanAd{
 @Schema({ timestamps: true })
 export class Ad {
   @Prop({ required: true }) title: string;
+  @Prop({ required: true, unique: true }) adSlug: string;
   @Prop({ required: true }) description: string;
   @Prop({ required: true }) price: number;
   @Prop({ type: Types.ObjectId, ref: 'User', required: true })
