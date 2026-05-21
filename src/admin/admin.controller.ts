@@ -1,5 +1,4 @@
-import { Controller, Post, Body, Res } from '@nestjs/common';
-import type { Response } from 'express';
+import { Controller, Post, Body } from '@nestjs/common';
 import { AdminService } from './admin.service';
 
 @Controller('admin')
@@ -12,7 +11,7 @@ export class AdminController {
   }
 
   @Post('login')
-  login(@Body() body, @Res({ passthrough: true }) res: Response) {
-    return this.adminService.login(body, res);
+  login(@Body() body) {
+    return this.adminService.login(body);
   }
 }
