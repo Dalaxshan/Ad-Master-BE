@@ -14,11 +14,11 @@ export class CategoriesService {
   }
 
   findAll() {
-    return this.catModel.find();
+    return this.catModel.find().populate('ads');
   }
 
-  async findOne(id: string) {
-    const cat = await this.catModel.findById(id);
+  async findOne(categorySlug: string) {
+    const cat = await this.catModel.findOne({ categorySlug }).populate('ads');
     if (!cat) throw new NotFoundException('Category not found');
     return cat;
   }

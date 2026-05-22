@@ -10,12 +10,14 @@ import { CloudinaryService } from '../cloudinary/cloudinary.service';
 import { CreateAdDto } from './dto/create-ad.dto';
 import { User, UserDocument } from 'src/users/users.schema';
 import { OrdersService } from 'src/orders/orders.service';
+import { Category, CategoryDocument } from 'src/categories/categories.schema';
 
 @Injectable()
 export class AdsService {
   constructor(
     @InjectModel(Ad.name) private adModel: Model<AdDocument>,
     @InjectModel(User.name) private userModel: Model<UserDocument>,
+    @InjectModel(Category.name) private catModel: Model<CategoryDocument>,
     private cloudinaryService: CloudinaryService,
     private ordersService: OrdersService,
   ) {}
@@ -51,12 +53,27 @@ export class AdsService {
 
     await this.ordersService.create(ad._id.toString(), sellerId);
 
+    const cat = await this.catModel.findOne({
+      categoryName: { $regex: `^${dto.category}$`, $options: 'i' },
+    });
+    if (!cat) throw new NotFoundException('Category not found');
+
+    await this.catModel.findByIdAndUpdate(cat._id, { $push: { ads: ad._id } });
+
     return ad;
+  }
+
+  slugToLabel(slug: string) {
+    return slug.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
   }
 
   findAll(query: any = {}) {
     const filter: any = {};
-    if (query.category) filter.category = query.category;
+    if (query.category)
+      filter.category = {
+        $regex: `^${this.slugToLabel(query.category)}$`,
+        $options: 'i',
+      };
     if (query.adSlug) filter.adSlug = query.adSlug;
     if (query.district) filter.district = query.district;
     if (query.subcategory) filter.subcategory = query.subcategory;

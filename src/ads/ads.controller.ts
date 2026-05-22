@@ -17,6 +17,7 @@ import { AdsService } from './ads.service';
 import { CreateAdDto } from './dto/create-ad.dto';
 import { memoryStorage } from 'multer';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth-guard';
+import { RolesGuard } from 'src/auth/guards/role-guard';
 
 @Controller('ads')
 export class AdsController {
@@ -25,11 +26,6 @@ export class AdsController {
   @Get()
   findAll(@Query() query) {
     return this.adsService.findAll(query);
-  }
-
-  @Get('category/:category')
-  findAllByCategory(@Param('category') category: string) {
-    return this.adsService.findAllByCategory(category);
   }
 
   @Get(':adSlug')

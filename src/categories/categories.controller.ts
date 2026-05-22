@@ -26,8 +26,8 @@ export class CategoriesController {
   }
 
   @Post()
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('admin')
+  @UseGuards(JwtAuthGuard)
+  // @Roles('admin')
   create(@Body() body) {
     return this.categoriesService.create(body);
   }
