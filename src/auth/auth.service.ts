@@ -24,6 +24,10 @@ export class AuthService {
     const user = await this.usersService.findByEmail(dto.email);
     if (!user) throw new UnauthorizedException('Invalid credentials');
     const valid = await bcrypt.compare(dto.password, user.password);
+    if (user.isVerified === false)
+      throw new UnauthorizedException(
+        'Please verify your email before logging in',
+      );
     if (!valid) throw new UnauthorizedException('Invalid credentials');
     const token = this.signToken(user._id.toString(), user.email, user.role);
     this.setTokenCookie(res, token);

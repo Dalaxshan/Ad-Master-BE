@@ -17,6 +17,7 @@ import { AdsService } from './ads.service';
 import { CreateAdDto } from './dto/create-ad.dto';
 import { memoryStorage } from 'multer';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth-guard';
+import { RolesGuard } from 'src/auth/guards/role-guard';
 
 @Controller('ads')
 export class AdsController {
@@ -27,9 +28,18 @@ export class AdsController {
     return this.adsService.findAll(query);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.adsService.findOne(id);
+  @Get(':adSlug')
+  findOneBySlug(@Param('adSlug') adSlug: string) {
+    return this.adsService.findOneBySlug(adSlug);
+  }
+
+  @Get(':category/:subcategory')
+  findByCategory(
+    @Param('category') category: string,
+    @Param('subcategory') subcategory: string,
+    @Query() query,
+  ) {
+    return this.adsService.findByCategory(category, subcategory, query);
   }
 
   @Post()
@@ -40,7 +50,7 @@ export class AdsController {
     @UploadedFiles() files: Express.Multer.File[],
     @Req() req,
   ) {
-    return this.adsService.create(dto, files || [], '6a054a43d2c284c9bb07eea0');
+    return this.adsService.create(dto, files || [], req.user.userId);
   }
 
   @Patch(':id')

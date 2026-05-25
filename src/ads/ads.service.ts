@@ -10,12 +10,14 @@ import { CloudinaryService } from '../cloudinary/cloudinary.service';
 import { CreateAdDto } from './dto/create-ad.dto';
 import { User, UserDocument } from 'src/users/users.schema';
 import { OrdersService } from 'src/orders/orders.service';
+import { Category, CategoryDocument } from 'src/categories/categories.schema';
 
 @Injectable()
 export class AdsService {
   constructor(
     @InjectModel(Ad.name) private adModel: Model<AdDocument>,
     @InjectModel(User.name) private userModel: Model<UserDocument>,
+    @InjectModel(Category.name) private catModel: Model<CategoryDocument>,
     private cloudinaryService: CloudinaryService,
     private ordersService: OrdersService,
   ) {}
@@ -28,8 +30,16 @@ export class AdsService {
     const images = await Promise.all(
       files.map((f) => this.cloudinaryService.uploadImage(f)),
     );
+
+    const adSlug = this.createAdSlug(dto.title);
+    const categorySlug = this.createAdSlug(dto.category);
+    const subCategorySlug = this.createAdSlug(dto.subcategory ?? '');
+
     const ad = await this.adModel.create({
       ...dto,
+      adSlug: adSlug,
+      categorySlug: categorySlug,
+      subCategorySlug: subCategorySlug,
       boostAds: dto.boostAds,
       seller: sellerId,
       images: images
@@ -47,25 +57,78 @@ export class AdsService {
 
     await this.ordersService.create(ad._id.toString(), sellerId);
 
+    const cat = await this.catModel.findOne({
+      categoryName: { $regex: `^${dto.category}$`, $options: 'i' },
+    });
+    if (!cat) throw new NotFoundException('Category not found');
+
+    await this.catModel.findByIdAndUpdate(cat._id, { $push: { ads: ad._id } });
+
     return ad;
+  }
+
+  slugToLabel(slug: string) {
+    return slug.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
   }
 
   findAll(query: any = {}) {
     const filter: any = {};
-    if (query.category) filter.category = query.category;
+    if (query.category)
+      filter.category = {
+        $regex: `^${this.slugToLabel(query.category)}$`,
+        $options: 'i',
+      };
+    if (query.adSlug) filter.adSlug = query.adSlug;
     if (query.district) filter.district = query.district;
     if (query.subcategory) filter.subcategory = query.subcategory;
     if (query.search) filter.title = { $regex: query.search, $options: 'i' };
+    if (query.minPrice || query.maxPrice) {
+      filter.price = {};
+      if (query.minPrice) filter.price.$gte = Number(query.minPrice);
+      if (query.maxPrice) filter.price.$lte = Number(query.maxPrice);
+    }
+    const sortMap: Record<string, any> = {
+      newest: { createdAt: -1 },
+      'price-asc': { price: 1 },
+      'price-desc': { price: -1 },
+    };
+    const sort = sortMap[query.sort] ?? { createdAt: -1 };
+
     return this.adModel
       .find(filter)
       .populate('seller', '-password')
       .sort({ createdAt: -1 });
   }
 
-  async findOne(id: string) {
-    const ad = await this.adModel.findById(id).populate('seller', '-password');
+  async findOneBySlug(slug: string) {
+    const ad = await this.adModel
+      .findOne({ adSlug: slug })
+      .populate('seller', '-password');
     if (!ad) throw new NotFoundException('Ad not found');
     return ad;
+  }
+
+  async findByCategory(
+    categorySlug: string,
+    subCategorySlug: string,
+    query: any = {},
+  ) {
+    const filter: any = { categorySlug, subCategorySlug };
+    if (query.district) filter.district = query.district;
+    if (query.minPrice || query.maxPrice) {
+      filter.price = {};
+      if (query.minPrice) filter.price.$gte = Number(query.minPrice);
+      if (query.maxPrice) filter.price.$lte = Number(query.maxPrice);
+    }
+
+    const sortMap: Record<string, any> = {
+      newest: { createdAt: -1 },
+      'price-asc': { price: 1 },
+      'price-desc': { price: -1 },
+    };
+    const sort = sortMap[query.sort] ?? { createdAt: -1 };
+
+    return this.adModel.find(filter).populate('seller', '-password').sort(sort);
   }
 
   async update(id: string, data: Partial<Ad>, userId: string, role: string) {
@@ -125,5 +188,12 @@ export class AdsService {
       { returnDocument: 'after' },
     );
     return updatedAd?.totalAmount;
+  }
+
+  createAdSlug(title: string) {
+    return title
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '');
   }
 }

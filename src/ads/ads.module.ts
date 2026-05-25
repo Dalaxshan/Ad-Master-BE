@@ -6,12 +6,14 @@ import { CloudinaryModule } from '../cloudinary/cloudinary.module';
 import { Ad, AdSchema } from './ads.schema';
 import { User, UserSchema } from 'src/users/users.schema';
 import { OrdersModule } from 'src/orders/orders.module';
+import { Category, CategorySchema } from 'src/categories/categories.schema';
 
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: Ad.name, schema: AdSchema },
       { name: User.name, schema: UserSchema },
+      { name: Category.name, schema: CategorySchema },
     ]),
     CloudinaryModule,
     OrdersModule,

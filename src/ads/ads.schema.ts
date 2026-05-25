@@ -12,7 +12,7 @@ export class BoostAd {
 }
 
 @Schema()
-export class PlanAd{
+export class PlanAd {
   @Prop() plan: string;
   @Prop() startDate: Date;
   @Prop() endDate: Date;
@@ -22,6 +22,7 @@ export class PlanAd{
 @Schema({ timestamps: true })
 export class Ad {
   @Prop({ required: true }) title: string;
+  @Prop({ required: true, unique: true }) adSlug: string;
   @Prop({ required: true }) description: string;
   @Prop({ required: true }) price: number;
   @Prop({ type: Types.ObjectId, ref: 'User', required: true })
@@ -54,6 +55,8 @@ export class Ad {
   })
   category: string;
   @Prop() subcategory: string;
+  @Prop() categorySlug: string;
+  @Prop() subCategorySlug: string;
   @Prop({ enum: ['active', 'inactive', 'pending'], default: 'active' })
   status: string;
 }
