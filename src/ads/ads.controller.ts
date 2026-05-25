@@ -33,6 +33,15 @@ export class AdsController {
     return this.adsService.findOneBySlug(adSlug);
   }
 
+  @Get(':category/:subcategory')
+  findByCategory(
+    @Param('category') category: string,
+    @Param('subcategory') subcategory: string,
+    @Query() query,
+  ) {
+    return this.adsService.findByCategory(category, subcategory, query);
+  }
+
   @Post()
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(FilesInterceptor('images', 10, { storage: memoryStorage() }))
@@ -41,7 +50,7 @@ export class AdsController {
     @UploadedFiles() files: Express.Multer.File[],
     @Req() req,
   ) {
-    return this.adsService.create(dto, files || [], '6a054a43d2c284c9bb07eea0');
+    return this.adsService.create(dto, files || [], req.user.userId);
   }
 
   @Patch(':id')

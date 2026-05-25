@@ -25,6 +25,7 @@ export class CategoriesController {
     return this.categoriesService.findOne(id);
   }
 
+
   @Post()
   @UseGuards(JwtAuthGuard)
   // @Roles('admin')

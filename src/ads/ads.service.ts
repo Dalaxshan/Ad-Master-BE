@@ -32,10 +32,14 @@ export class AdsService {
     );
 
     const adSlug = this.createAdSlug(dto.title);
+    const categorySlug = this.createAdSlug(dto.category);
+    const subCategorySlug = this.createAdSlug(dto.subcategory ?? '');
 
     const ad = await this.adModel.create({
       ...dto,
       adSlug: adSlug,
+      categorySlug: categorySlug,
+      subCategorySlug: subCategorySlug,
       boostAds: dto.boostAds,
       seller: sellerId,
       images: images
@@ -78,6 +82,18 @@ export class AdsService {
     if (query.district) filter.district = query.district;
     if (query.subcategory) filter.subcategory = query.subcategory;
     if (query.search) filter.title = { $regex: query.search, $options: 'i' };
+    if (query.minPrice || query.maxPrice) {
+      filter.price = {};
+      if (query.minPrice) filter.price.$gte = Number(query.minPrice);
+      if (query.maxPrice) filter.price.$lte = Number(query.maxPrice);
+    }
+    const sortMap: Record<string, any> = {
+      newest: { createdAt: -1 },
+      'price-asc': { price: 1 },
+      'price-desc': { price: -1 },
+    };
+    const sort = sortMap[query.sort] ?? { createdAt: -1 };
+
     return this.adModel
       .find(filter)
       .populate('seller', '-password')
@@ -90,6 +106,29 @@ export class AdsService {
       .populate('seller', '-password');
     if (!ad) throw new NotFoundException('Ad not found');
     return ad;
+  }
+
+  async findByCategory(
+    categorySlug: string,
+    subCategorySlug: string,
+    query: any = {},
+  ) {
+    const filter: any = { categorySlug, subCategorySlug };
+    if (query.district) filter.district = query.district;
+    if (query.minPrice || query.maxPrice) {
+      filter.price = {};
+      if (query.minPrice) filter.price.$gte = Number(query.minPrice);
+      if (query.maxPrice) filter.price.$lte = Number(query.maxPrice);
+    }
+
+    const sortMap: Record<string, any> = {
+      newest: { createdAt: -1 },
+      'price-asc': { price: 1 },
+      'price-desc': { price: -1 },
+    };
+    const sort = sortMap[query.sort] ?? { createdAt: -1 };
+
+    return this.adModel.find(filter).populate('seller', '-password').sort(sort);
   }
 
   async update(id: string, data: Partial<Ad>, userId: string, role: string) {
