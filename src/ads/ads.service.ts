@@ -50,7 +50,7 @@ export class AdsService {
         })),
     });
 
-    await this.calculateTotalCharge(ad._id.toString());
+    // await this.calculateTotalCharge(ad._id.toString());
     await this.userModel.findByIdAndUpdate(sellerId, {
       $push: { ads: ad._id },
     });
@@ -171,24 +171,24 @@ export class AdsService {
     );
   }
 
-  async calculateTotalCharge(adId: string) {
-    const ad = await this.adModel.findById(adId);
-    if (!ad) throw new NotFoundException('Ad not found');
-    let totalCharge = 0;
-    if (ad.plan) totalCharge += ad.plan.planCharge;
-    if (ad.boostAds) {
-      totalCharge += ad.boostAds.reduce(
-        (sum, boostAd) => sum + boostAd.boostCharge,
-        0,
-      );
-    }
-    const updatedAd = await this.adModel.findByIdAndUpdate(
-      adId,
-      { totalAmount: totalCharge },
-      { returnDocument: 'after' },
-    );
-    return updatedAd?.totalAmount;
-  }
+  // async calculateTotalCharge(adId: string) {
+  //   const ad = await this.adModel.findById(adId);
+  //   if (!ad) throw new NotFoundException('Ad not found');
+  //   let totalCharge = 0;
+  //   if (ad.plan) totalCharge += ad.plan.planCharge;
+  //   if (ad.boostAds) {
+  //     totalCharge += ad.boostAds.reduce(
+  //       (sum, boostAd) => sum + boostAd.boostCharge,
+  //       0,
+  //     );
+  //   }
+  //   const updatedAd = await this.adModel.findByIdAndUpdate(
+  //     adId,
+  //     { totalAmount: totalCharge },
+  //     { returnDocument: 'after' },
+  //   );
+  //   return updatedAd?.totalAmount;
+  // }
 
   createAdSlug(title: string) {
     return title

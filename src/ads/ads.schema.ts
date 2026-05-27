@@ -3,20 +3,18 @@ import { Document, Types } from 'mongoose';
 
 export type AdDocument = Ad & Document;
 
-@Schema()
 export class BoostAd {
-  @Prop() boost: string;
-  @Prop() startDate: Date;
-  @Prop() endDate: Date;
-  @Prop() boostCharge: number;
+  boost: string;
+  startDate: Date;
+  endDate: Date;
+  boostCharge: number;
 }
 
-@Schema()
 export class PlanAd {
-  @Prop() plan: string;
-  @Prop() startDate: Date;
-  @Prop() endDate: Date;
-  @Prop() planCharge: number;
+  plan: string;
+  startDate: Date;
+  endDate: Date;
+  planCharge: number;
 }
 
 @Schema({ timestamps: true })
@@ -31,8 +29,28 @@ export class Ad {
     url: string;
     publicId: string;
   }[];
-  @Prop() plan: PlanAd;
-  @Prop({ type: [BoostAd], default: [] }) boostAds: BoostAd[];
+  @Prop({
+    type: {
+      plan: String,
+      startDate: Date,
+      endDate: Date,
+      planCharge: Number,
+    },
+  })
+  plan: PlanAd;
+
+  @Prop({
+    type: [
+      {
+        boost: String,
+        startDate: Date,
+        endDate: Date,
+        boostCharge: Number,
+      },
+    ],
+    default: [],
+  })
+  boostAds: BoostAd[];
   @Prop({ default: 0 }) totalAmount: number;
   @Prop() location: string;
   @Prop() district: string;
