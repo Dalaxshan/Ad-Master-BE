@@ -7,6 +7,8 @@ import { Ad, AdSchema } from './ads.schema';
 import { User, UserSchema } from 'src/users/users.schema';
 import { OrdersModule } from 'src/orders/orders.module';
 import { Category, CategorySchema } from 'src/categories/categories.schema';
+import { RolesGuard } from 'src/auth/guards/role-guard';
+import { Reflector } from '@nestjs/core';
 
 @Module({
   imports: [
@@ -18,7 +20,7 @@ import { Category, CategorySchema } from 'src/categories/categories.schema';
     CloudinaryModule,
     OrdersModule,
   ],
-  providers: [AdsService],
+  providers: [AdsService, RolesGuard, Reflector],
   controllers: [AdsController],
 })
 export class AdsModule {}

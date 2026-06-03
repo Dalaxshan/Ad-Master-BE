@@ -9,11 +9,20 @@ export class CategoriesService {
     @InjectModel(Category.name) private catModel: Model<CategoryDocument>,
   ) {}
 
-  create(data: Partial<Category>) {
-    return this.catModel.create(data);
+  async create(data: Partial<Category>) {
+    if (
+      await this.catModel.findOne({
+        categorySlug: this.convertToSlug(data.categoryName || ''),
+      })
+    ) {
+      throw new NotFoundException('Category already exists');
+    }
+    const categorySlug = this.convertToSlug(data.categoryName || '');
+    const createdCat = new this.catModel({ ...data, categorySlug });
+    return createdCat.save();
   }
 
-  findAll() {
+  async findAll() {
     return this.catModel.find().populate('ads');
   }
 
@@ -23,11 +32,35 @@ export class CategoriesService {
     return cat;
   }
 
-  update(id: string, data: Partial<Category>) {
+  async update(id: string, data: Partial<Category>) {
     return this.catModel.findByIdAndUpdate(id, data, { new: true });
   }
 
-  remove(id: string) {
+  async addSubcategory(id: string, subcategoryName: string) {
+    const subcategorySlug = this.convertToSlug(subcategoryName);
+    return this.catModel.findByIdAndUpdate(
+      id,
+      { $push: { subcategory: { subcategoryName, subcategorySlug } } },
+      { new: true },
+    );
+  }
+
+  async remove(id: string) {
     return this.catModel.findByIdAndDelete(id);
+  }
+
+  async removeSubcategory(id: string, subId: string) {
+    return this.catModel.findByIdAndUpdate(
+      id,
+      { $pull: { subcategory: { _id: subId } } },
+      { new: true },
+    );
+  }
+
+  convertToSlug(name: string) {
+    return name
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '');
   }
 }

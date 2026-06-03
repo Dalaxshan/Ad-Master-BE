@@ -55,27 +55,13 @@ export class Ad {
   @Prop() location: string;
   @Prop() district: string;
   @Prop({
-    enum: [
-      'Vehicles',
-      'Property',
-      'Electronics',
-      'Jobs',
-      'Services',
-      'Home & Garden',
-      'Animals & Pets',
-      'Business',
-      'Fashion & Beauty',
-      'Education',
-      'Food & Agriculture',
-      'Others',
-    ],
     required: true,
   })
   category: string;
   @Prop() subcategory: string;
   @Prop() categorySlug: string;
   @Prop() subCategorySlug: string;
-  @Prop({ enum: ['active', 'inactive', 'pending'], default: 'active' })
+  @Prop({ enum: ['active', 'inactive', 'pending'], default: 'pending' })
   status: string;
 }
 

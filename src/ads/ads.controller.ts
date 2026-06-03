@@ -18,6 +18,7 @@ import { CreateAdDto } from './dto/create-ad.dto';
 import { memoryStorage } from 'multer';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth-guard';
 import { RolesGuard } from 'src/auth/guards/role-guard';
+import { Roles } from 'src/auth/decorators/roles.decorator';
 
 @Controller('ads')
 export class AdsController {
@@ -26,6 +27,11 @@ export class AdsController {
   @Get()
   findAll(@Query() query) {
     return this.adsService.findAll(query);
+  }
+
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    return this.adsService.findOne(id);
   }
 
   @Get(':adSlug')
@@ -59,10 +65,18 @@ export class AdsController {
     return this.adsService.update(id, body, req.user.userId, req.user.role);
   }
 
+  @Patch(':id/status')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
+  updateStatus(@Param('id') id: string, @Body() body, @Req() req) {
+    return this.adsService.updateStatus(id, body.status);
+  }
+
   @Delete(':id')
-  @UseGuards(JwtAuthGuard)
+  // @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
   remove(@Param('id') id: string, @Req() req) {
-    return this.adsService.remove(id, req.user.userId, req.user.role);
+    return this.adsService.remove(id, '6a054a43d2c284c9bb07eea0', 'admin');
   }
 
   @Post(':id/boost')

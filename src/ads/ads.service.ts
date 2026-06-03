@@ -96,7 +96,7 @@ export class AdsService {
 
     return this.adModel
       .find(filter)
-      .populate('seller', '-password')
+      .populate('seller', 'firstName lastName email phoneNumber')
       .sort({ createdAt: -1 });
   }
 
@@ -104,6 +104,12 @@ export class AdsService {
     const ad = await this.adModel
       .findOne({ adSlug: slug })
       .populate('seller', '-password');
+    if (!ad) throw new NotFoundException('Ad not found');
+    return ad;
+  }
+
+  async findOne(id: string) {
+    const ad = await this.adModel.findById(id).populate('seller', '-password');
     if (!ad) throw new NotFoundException('Ad not found');
     return ad;
   }
@@ -141,6 +147,16 @@ export class AdsService {
     });
   }
 
+  async updateStatus(id: string, status: string) {
+    const ad = await this.adModel.findById(id);
+    if (!ad) throw new NotFoundException('Ad not found');
+    return this.adModel.findByIdAndUpdate(
+      id,
+      { status },
+      { returnDocument: 'after' },
+    );
+  }
+
   async remove(id: string, userId: string, role: string) {
     const ad = await this.adModel.findById(id);
     if (!ad) throw new NotFoundException('Ad not found');
@@ -153,8 +169,12 @@ export class AdsService {
         ),
       );
     }
-    await this.adModel.findByIdAndDelete(id);
-    await this.userModel.findByIdAndUpdate(userId, { $pull: { ads: id } });
+    await Promise.all([
+      this.adModel.findByIdAndDelete(id),
+      this.userModel.findByIdAndUpdate(ad.seller, {
+        $pull: { ads: ad._id },
+      }),
+    ]);
   }
 
   async boostAd(id: string, boostData: any, userId: string) {
