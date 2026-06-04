@@ -73,10 +73,10 @@ export class AdsController {
   }
 
   @Delete(':id')
-  // @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
   remove(@Param('id') id: string, @Req() req) {
-    return this.adsService.remove(id, '6a054a43d2c284c9bb07eea0', 'admin');
+    return this.adsService.remove(id, req.user.userId, 'admin');
   }
 
   @Post(':id/boost')

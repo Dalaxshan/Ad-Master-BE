@@ -175,6 +175,8 @@ export class AdsService {
         $pull: { ads: ad._id },
       }),
     ]);
+
+    await this.ordersService.findByIdAndDeleteByAdId(id);
   }
 
   async boostAd(id: string, boostData: any, userId: string) {

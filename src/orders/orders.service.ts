@@ -36,4 +36,9 @@ export class OrdersService {
       { returnDocument: 'after' },
     );
   }
+
+  findByIdAndDeleteByAdId(adId: string) {
+    console.log('Ad Id:', adId);
+    return this.orderModel.deleteMany({ ad: adId });
+  }
 }
