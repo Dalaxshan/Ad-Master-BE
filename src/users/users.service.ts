@@ -32,7 +32,11 @@ export class UsersService {
   }
 
   async findAll(): Promise<UserDocument[]> {
-    return this.userModel.find().select('-password');
+    return this.userModel
+      .find()
+      .select('-password')
+      .populate('ads', 'title description images price status')
+      .exec();
   }
 
   async update(id: string, data: Partial<User>): Promise<UserDocument> {

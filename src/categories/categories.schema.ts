@@ -15,6 +15,8 @@ export class Category {
   @Prop({ required: true, unique: true }) categorySlug: string;
   @Prop({ type: [Subcategory], default: [] }) subcategory: Subcategory[];
   @Prop({ type: [{ type: Types.ObjectId, ref: 'Ad' }], default: [] }) ads: Types.ObjectId[];
+  @Prop({ required: true }) standardRate: number;
+  @Prop({ required: true }) premiumRate: number;
 }
 
 export const CategorySchema = SchemaFactory.createForClass(Category);

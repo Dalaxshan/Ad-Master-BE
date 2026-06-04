@@ -39,10 +39,27 @@ export class CategoriesController {
     return this.categoriesService.update(id, body);
   }
 
+  @Patch(':id/subcategory')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
+  addSubcategory(
+    @Param('id') id: string,
+    @Body('subcategoryName') subcategoryName: string,
+  ) {
+    return this.categoriesService.addSubcategory(id, subcategoryName);
+  }
+
   @Delete(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
   remove(@Param('id') id: string) {
     return this.categoriesService.remove(id);
+  }
+
+  @Delete(':id/subcategory/:subId')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
+  removeSubcategory(@Param('id') id: string, @Param('subId') subId: string) {
+    return this.categoriesService.removeSubcategory(id, subId);
   }
 }

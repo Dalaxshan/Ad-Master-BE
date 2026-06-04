@@ -8,7 +8,10 @@ export class Order {
   @Prop({ type: Types.ObjectId, ref: 'Ad', required: true }) ad: Types.ObjectId;
   @Prop({ type: Types.ObjectId, ref: 'User', required: true })
   buyer: Types.ObjectId;
-  @Prop({ enum: ['verified', 'notVerified'], default: 'notVerified' })
+  @Prop({
+    enum: ['verified', 'notVerified', 'cancelled'],
+    default: 'notVerified',
+  })
   payment: string;
   @Prop({ default: Date.now }) orderDate: Date;
 }
