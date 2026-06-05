@@ -49,4 +49,28 @@ export class UsersService {
   async remove(id: string): Promise<void> {
     await this.userModel.findByIdAndDelete(id);
   }
+
+  async setResetToken(email: string, token: string, expires: Date) {
+    const user = await this.userModel.findOne({ email });
+    if (!user) return null;
+    user.resetPasswordToken = token;
+    user.resetPasswordExpires = expires;
+    return user.save();
+  }
+
+  async findByResetToken(token: string) {
+    return this.userModel.findOne({
+      resetPasswordToken: token,
+      resetPasswordExpires: { $gt: new Date() },
+    });
+  }
+
+  async changePassword(id: string, newPassword: string) {
+    const hashed = await bcrypt.hash(newPassword, 10);
+    return this.userModel.findByIdAndUpdate(id, {
+      password: hashed,
+      resetPasswordToken: undefined,
+      resetPasswordExpires: undefined,
+    });
+  }
 }
