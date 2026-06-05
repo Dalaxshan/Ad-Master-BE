@@ -15,7 +15,7 @@ async function bootstrap() {
     'http://localhost:3001',
     'https://ad-master-fe.vercel.app',
     'https://www.ad-master-fe.vercel.app',
-    'https://ad-master-dashboard.vercel.app/',
+    'https://ad-master-dashboard.vercel.app',
   ];
 
   app.enableCors({
