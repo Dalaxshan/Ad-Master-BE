@@ -16,6 +16,8 @@ export class User {
   @Prop({ type: [{ type: Types.ObjectId, ref: 'Ad' }] }) ads?: Types.ObjectId[];
   @Prop({ enum: ['admin', 'seller', 'customer'], default: 'seller' })
   role!: string;
+  @Prop() resetPasswordToken?: string;
+  @Prop() resetPasswordExpires?: Date;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

@@ -108,6 +108,11 @@ export class AdsService {
     return ad;
   }
 
+  async findOneByIdOrSlug(idOrSlug: string) {
+    const isObjectId = /^[a-f\d]{24}$/i.test(idOrSlug);
+    return isObjectId ? this.findOne(idOrSlug) : this.findOneBySlug(idOrSlug);
+  }
+
   async findOne(id: string) {
     const ad = await this.adModel.findById(id).populate('seller', '-password');
     if (!ad) throw new NotFoundException('Ad not found');

@@ -31,12 +31,7 @@ export class AdsController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.adsService.findOne(id);
-  }
-
-  @Get(':adSlug')
-  findOneBySlug(@Param('adSlug') adSlug: string) {
-    return this.adsService.findOneBySlug(adSlug);
+    return this.adsService.findOneByIdOrSlug(id);
   }
 
   @Get(':category/:subcategory')
