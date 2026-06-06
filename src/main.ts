@@ -13,9 +13,10 @@ async function bootstrap() {
   const allowedOrigins = [
     'http://localhost:3000',
     'http://localhost:3001',
-    'https://ad-master-fe.vercel.app',
-    'https://www.ad-master-fe.vercel.app',
-    'https://ad-master-dashboard.vercel.app',
+    'https://www.admasterlk.com',
+    'https://admasterlk.com',
+    'https://admin.admasterlk.com',
+    'https://www.admin.admasterlk.com',
   ];
 
   app.enableCors({
