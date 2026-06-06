@@ -11,11 +11,12 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
 
   const allowedOrigins = [
+    'https://www.admasterlk.com',
+    'https://admasterlk.com',
+    'https://admin.admasterlk.com',
+    'https://www.admin.admasterlk.com',
     'http://localhost:3000',
     'http://localhost:3001',
-    'https://ad-master-fe.vercel.app',
-    'https://www.ad-master-fe.vercel.app',
-    'https://ad-master-dashboard.vercel.app',
   ];
 
   app.enableCors({
