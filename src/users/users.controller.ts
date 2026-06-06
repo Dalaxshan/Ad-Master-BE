@@ -39,7 +39,6 @@ export class UsersController {
     return this.usersService.update(id, { isVerified } as Partial<User>);
   }
 
-
   @Get()
   @UseGuards(RolesGuard)
   @Roles('admin')
