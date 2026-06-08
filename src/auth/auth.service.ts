@@ -40,8 +40,8 @@ export class AuthService {
       );
     if (!valid) throw new UnauthorizedException('Invalid credentials');
     const token = this.signToken(user._id.toString(), user.email, user.role);
-    this.setTokenCookie(res, token);
-    return { user: { id: user._id, email: user.email, role: user.role } };
+    // this.setTokenCookie(res, token);
+    return { token };
   }
 
   logout(res: Response) {
