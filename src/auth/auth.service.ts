@@ -21,6 +21,9 @@ export class AuthService {
   ) {}
 
   async register(dto: CreateUserDto, res: Response) {
+    if (await this.usersService.findByEmail(dto.email)) {
+      throw new BadRequestException('User already exists');
+    }
     const user = await this.usersService.create(dto);
     const token = this.signToken(user._id.toString(), user.email, user.role);
     this.setTokenCookie(res, token);
@@ -33,7 +36,7 @@ export class AuthService {
     const valid = await bcrypt.compare(dto.password, user.password);
     if (user.isVerified === false)
       throw new UnauthorizedException(
-        'Please verify your email before logging in',
+        'Wait for admin to verify your account before logging in',
       );
     if (!valid) throw new UnauthorizedException('Invalid credentials');
     const token = this.signToken(user._id.toString(), user.email, user.role);
@@ -75,7 +78,8 @@ export class AuthService {
   ) {
     const user = await this.usersService.findById(userId);
     const valid = await bcrypt.compare(currentPassword, user.password);
-    if (!valid) throw new UnauthorizedException('Current password is incorrect');
+    if (!valid)
+      throw new UnauthorizedException('Current password is incorrect');
     await this.usersService.changePassword(userId, newPassword);
     return { message: 'Password changed successfully' };
   }
