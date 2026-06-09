@@ -11,6 +11,7 @@ export class MailerService {
       host: this.config.get('MAIL_HOST'),
       port: this.config.get('MAIL_PORT'),
       secure: true,
+      pool: true,
       auth: {
         user: this.config.get('MAIL_USER'),
         pass: this.config.get('MAIL_PASS'),
