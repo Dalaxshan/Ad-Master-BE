@@ -6,11 +6,12 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Ad, AdDocument } from './ads.schema';
-import { CloudinaryService } from '../cloudinary/cloudinary.service';
+
 import { CreateAdDto } from './dto/create-ad.dto';
 import { User, UserDocument } from 'src/users/users.schema';
 import { OrdersService } from 'src/orders/orders.service';
 import { Category, CategoryDocument } from 'src/categories/categories.schema';
+import { R2Service } from 'src/r2/r2.service';
 
 @Injectable()
 export class AdsService {
@@ -18,7 +19,7 @@ export class AdsService {
     @InjectModel(Ad.name) private adModel: Model<AdDocument>,
     @InjectModel(User.name) private userModel: Model<UserDocument>,
     @InjectModel(Category.name) private catModel: Model<CategoryDocument>,
-    private cloudinaryService: CloudinaryService,
+    private r2Service: R2Service,
     private ordersService: OrdersService,
   ) {}
 
@@ -28,7 +29,7 @@ export class AdsService {
     sellerId: string,
   ): Promise<AdDocument> {
     const images = await Promise.all(
-      files.map((f) => this.cloudinaryService.uploadImage(f)),
+      files.map((f) => this.r2Service.uploadFile(f)),
     );
 
     const adSlug = this.createAdSlug(dto.title);
@@ -45,8 +46,8 @@ export class AdsService {
       images: images
         .filter((img) => img !== null && img !== undefined)
         .map((img) => ({
-          url: img.secure_url,
-          publicId: img.public_id,
+          url: img.url,
+          publicId: img.key,
         })),
     });
 
@@ -169,9 +170,7 @@ export class AdsService {
       throw new ForbiddenException();
     if (ad.images && ad.images.length > 0) {
       await Promise.all(
-        ad.images.map((img) =>
-          this.cloudinaryService.deleteImage(img.publicId),
-        ),
+        ad.images.map((img) => this.r2Service.deleteImage(img.publicId)),
       );
     }
     await Promise.all([

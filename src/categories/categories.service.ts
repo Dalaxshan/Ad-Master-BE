@@ -5,7 +5,7 @@ import { Category, CategoryDocument } from './categories.schema';
 import { Ad, AdDocument } from '../ads/ads.schema';
 import { Order, OrderDocument } from '../orders/orders.schema';
 import { User, UserDocument } from '../users/users.schema';
-import { CloudinaryService } from '../cloudinary/cloudinary.service';
+import { R2Service } from 'src/r2/r2.service';
 
 @Injectable()
 export class CategoriesService {
@@ -14,7 +14,7 @@ export class CategoriesService {
     @InjectModel(Ad.name) private adModel: Model<AdDocument>,
     @InjectModel(Order.name) private orderModel: Model<OrderDocument>,
     @InjectModel(User.name) private userModel: Model<UserDocument>,
-    private cloudinaryService: CloudinaryService,
+    private r2Service: R2Service,
   ) {}
 
   async create(data: Partial<Category>) {
@@ -58,9 +58,7 @@ export class CategoriesService {
     const adIds = ads.map((ad) => ad._id);
     await Promise.all(
       ads.flatMap((ad) =>
-        ad.images.map((img) =>
-          this.cloudinaryService.deleteImage(img.publicId),
-        ),
+        ad.images.map((img) => this.r2Service.deleteImage(img.publicId)),
       ),
     );
     await Promise.all([

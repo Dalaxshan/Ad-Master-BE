@@ -57,10 +57,15 @@ export class AuthService {
 
   async forgotPassword(email: string) {
     const token = crypto.randomBytes(32).toString('hex');
-    const expires = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+    const expires = new Date(Date.now() + 60 * 60 * 1000);
     const user = await this.usersService.setResetToken(email, token, expires);
-    if (user) await this.mailerService.sendResetPasswordEmail(email, token);
-    // always return success to avoid email enumeration
+    if (user) {
+      try {
+        await this.mailerService.sendResetPasswordEmail(email, token);
+      } catch (e) {
+        console.error('Mail send failed:', e.message);
+      }
+    }
     return { message: 'If that email exists, a reset link has been sent.' };
   }
 
