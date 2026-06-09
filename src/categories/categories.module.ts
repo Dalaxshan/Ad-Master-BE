@@ -6,7 +6,8 @@ import { Category, CategorySchema } from './categories.schema';
 import { Ad, AdSchema } from '../ads/ads.schema';
 import { Order, OrderSchema } from '../orders/orders.schema';
 import { User, UserSchema } from '../users/users.schema';
-import { CloudinaryModule } from '../cloudinary/cloudinary.module';
+import { R2Module } from 'src/r2/r2.module';
+
 
 @Module({
   imports: [
@@ -16,7 +17,7 @@ import { CloudinaryModule } from '../cloudinary/cloudinary.module';
       { name: Order.name, schema: OrderSchema },
       { name: User.name, schema: UserSchema },
     ]),
-    CloudinaryModule,
+    R2Module,
   ],
   providers: [CategoriesService],
   controllers: [CategoriesController],

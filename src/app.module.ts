@@ -6,8 +6,8 @@ import { UsersModule } from './users/users.module';
 import { AdsModule } from './ads/ads.module';
 import { CategoriesModule } from './categories/categories.module';
 import { OrdersModule } from './orders/orders.module';
-import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { AdminModule } from './admin/admin.module';
+import { R2Module } from './r2/r2.module';
 
 @Module({
   imports: [
@@ -19,11 +19,11 @@ import { AdminModule } from './admin/admin.module';
       }),
     }),
     AuthModule,
+    R2Module,
     UsersModule,
     AdsModule,
     CategoriesModule,
     OrdersModule,
-    CloudinaryModule,
     AdminModule,
   ],
 })
