@@ -2,8 +2,12 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import cookieParser from 'cookie-parser';
+import { setServers } from 'node:dns';
 
 async function bootstrap() {
+  setServers(["1.1.1.1", "8.8.8.8"]);
+
+  
   const app = await NestFactory.create(AppModule);
   const allowedOrigins = [
     'https://www.admasterlk.com',
