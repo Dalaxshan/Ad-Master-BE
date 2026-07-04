@@ -2,15 +2,22 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Order, OrderDocument } from './orders.schema';
+import { MailService } from 'src/mail/mail.service';
 
 @Injectable()
 export class OrdersService {
   constructor(
     @InjectModel(Order.name) private orderModel: Model<OrderDocument>,
-  ) {}
+    private mailService: MailService,
+  ) { }
 
-  create(adId: string, buyerId: string) {
-    return this.orderModel.create({ ad: adId, buyer: buyerId });
+  async create(adId: string, buyerId: string) {
+    const order = await this.orderModel.create({ ad: adId, buyer: buyerId });
+    await this.mailService.sendNewOrderEmail(
+      buyerId.slice(-6).toUpperCase(),
+      order.id.slice(-6).toUpperCase()
+    );
+    return order;
   }
 
   findAll() {
