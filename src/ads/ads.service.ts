@@ -12,6 +12,7 @@ import { User, UserDocument } from 'src/users/users.schema';
 import { OrdersService } from 'src/orders/orders.service';
 import { Category, CategoryDocument } from 'src/categories/categories.schema';
 import { R2Service } from 'src/r2/r2.service';
+import { MailService } from 'src/mail/mail.service';
 
 @Injectable()
 export class AdsService {
@@ -21,7 +22,8 @@ export class AdsService {
     @InjectModel(Category.name) private catModel: Model<CategoryDocument>,
     private r2Service: R2Service,
     private ordersService: OrdersService,
-  ) {}
+    private mailService: MailService,
+  ) { }
 
   async create(
     dto: CreateAdDto,
@@ -154,13 +156,18 @@ export class AdsService {
   }
 
   async updateStatus(id: string, status: string) {
-    const ad = await this.adModel.findById(id);
+    const ad = await this.adModel.findById(id).populate<{ seller: UserDocument }>('seller');
     if (!ad) throw new NotFoundException('Ad not found');
-    return this.adModel.findByIdAndUpdate(
+    const updated = await this.adModel.findByIdAndUpdate(
       id,
       { status },
       { returnDocument: 'after' },
     );
+    if (status === 'active') {
+      await this.mailService.sendApprovedAdEmail(ad.seller.email, ad.seller.firstName, `https://www.admasterlk.com/ad/${ad.adSlug}`);
+    }
+    return { message: 'Ad status updated successfully' };
+
   }
 
   async remove(id: string, userId: string, role: string) {
