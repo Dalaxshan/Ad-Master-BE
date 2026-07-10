@@ -16,8 +16,11 @@ export class UsersService {
   async create(dto: CreateUserDto): Promise<UserDocument> {
     const exists = await this.userModel.findOne({ email: dto.email });
     if (exists) throw new ConflictException('Email already registered');
-    const hashed = await bcrypt.hash(dto.password, 10);
-    const user = new this.userModel({ ...dto, password: hashed });
+    const data: any = { ...dto };
+    if (dto.password) {
+      data.password = await bcrypt.hash(dto.password, 10);
+    }
+    const user = new this.userModel(data);
     return user.save();
   }
 
