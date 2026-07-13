@@ -22,8 +22,11 @@ export class AuthController {
   }
 
   @Post('google')
-  googleLogin(@Body() dto: GoogleLoginDto) {
-    return this.authService.validateGoogleUser(dto);
+  googleLogin(
+    @Body() dto: GoogleLoginDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    return this.authService.validateGoogleUser(dto, res);
   }
 
   @Post('login')
