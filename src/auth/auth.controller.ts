@@ -22,7 +22,7 @@ export class AuthController {
   }
 
   @Post('google')
-  async googleLogin(@Body() dto: GoogleLoginDto) {
+  googleLogin(@Body() dto: GoogleLoginDto) {
     return this.authService.validateGoogleUser(dto);
   }
 
