@@ -10,15 +10,15 @@ import * as crypto from 'crypto';
 import { UsersService } from '../users/users.service';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { LoginDto } from './dto/login.dto';
-import { MailerService } from '../mailer/mailer.service';
 import { GoogleLoginDto } from './dto/google-login.dto';
+import { MailService } from 'src/mail/mail.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private usersService: UsersService,
     private jwtService: JwtService,
-  private mailService: MailService
+    private mailService: MailService,
   ) {}
 
   async register(dto: CreateUserDto, res: Response) {
@@ -29,9 +29,11 @@ export class AuthService {
     const token = this.signToken(user._id.toString(), user.email, user.role);
     this.setTokenCookie(res, token);
 
-    await this.mailService.sendWelcomeEmail(user.email, user.firstName).catch((e) => {
-      console.error('Mail send failed:', e.message);
-    });
+    await this.mailService
+      .sendWelcomeEmail(user.email, user.firstName)
+      .catch((e) => {
+        console.error('Mail send failed:', e.message);
+      });
     return { user: { id: user._id, email: user.email, role: user.role } };
   }
 
@@ -119,7 +121,6 @@ export class AuthService {
     const expires = new Date(Date.now() + 60 * 60 * 1000);
     const user = await this.usersService.setResetToken(email, token, expires);
     if (user) {
-
       console.log('Sending reset password email to:', email);
       await this.mailService.sendResetPasswordEmail(email, token).catch((e) => {
         console.error('Mail send failed:', e.message);
