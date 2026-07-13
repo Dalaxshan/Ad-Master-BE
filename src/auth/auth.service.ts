@@ -60,7 +60,7 @@ export class AuthService {
     };
   }
 
-  async validateGoogleUser(dto: GoogleLoginDto) {
+  async validateGoogleUser(dto: GoogleLoginDto, res: Response) {
     let user = await this.usersService.findByEmail(dto.email);
 
     if (!user) {
@@ -88,8 +88,10 @@ export class AuthService {
       role: user.role,
     };
 
+    const token = this.signToken(user._id.toString(), user.email, user.role);
+    this.setTokenCookie(res, token);
     return {
-      accessToken: this.signToken(user._id.toString(), user.email, user.role),
+      accessToken: token,
       refreshToken: this.jwtService.sign(payload, {
         expiresIn: (process.env.JWT_REFRESH_EXPIRES || '7d') as any,
       }),
