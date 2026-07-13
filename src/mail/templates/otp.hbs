@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 40px auto;
+      background: #fff;
+      border-radius: 8px;
+      padding: 40px;
+    }
+
+    .header {
+      background: #059669;
+      color: white;
+      padding: 20px;
+      border-radius: 8px 8px 0 0;
+      text-align: center;
+    }
+
+    .body {
+      padding: 30px 20px;
+      color: #333;
+    }
+
+    .otp-box {
+      font-size: 40px;
+      font-weight: bold;
+      letter-spacing: 10px;
+      color: #059669;
+      text-align: center;
+      padding: 20px;
+      background: #f0fff4;
+      border-radius: 8px;
+      margin: 20px 0;
+    }
+
+    .footer {
+      text-align: center;
+      color: #999;
+      font-size: 12px;
+      margin-top: 30px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Your OTP Code</h1>
+    </div>
+    <div class="body">
+      <h2>Hi {{name}},</h2>
+      <p>Your one-time password is:</p>
+      <div class="otp-box">{{otp}}</div>
+      <p>This OTP is valid for <strong>{{expiry}}</strong>. Do not share it with anyone.</p>
+    </div>
+    <div class="footer">
+      <p>© 2026 Admasterlk.com. All rights reserved.</p>
+    </div>
+  </div>
+</body>
+
+</html>

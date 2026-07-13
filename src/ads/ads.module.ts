@@ -10,6 +10,7 @@ import { Category, CategorySchema } from 'src/categories/categories.schema';
 import { RolesGuard } from 'src/auth/guards/role-guard';
 import { Reflector } from '@nestjs/core';
 import { R2Module } from 'src/r2/r2.module';
+import { MailModule } from 'src/mail/mail.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { R2Module } from 'src/r2/r2.module';
     ]),
     R2Module,
     OrdersModule,
+    MailModule
   ],
   providers: [AdsService, RolesGuard, Reflector],
   controllers: [AdsController],

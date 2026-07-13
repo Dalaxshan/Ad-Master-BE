@@ -8,10 +8,14 @@ import { Model } from 'mongoose';
 import * as bcrypt from 'bcryptjs';
 import { User, UserDocument } from './users.schema';
 import { CreateUserDto } from './dto/create-user.dto';
+import { MailService } from 'src/mail/mail.service';
 
 @Injectable()
 export class UsersService {
-  constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
+  constructor(
+    @InjectModel(User.name) private userModel: Model<UserDocument>,
+    private mailService: MailService
+  ) { }
 
   async create(dto: CreateUserDto): Promise<UserDocument> {
     const exists = await this.userModel.findOne({ email: dto.email });
@@ -43,10 +47,17 @@ export class UsersService {
   }
 
   async update(id: string, data: Partial<User>): Promise<UserDocument> {
-    return this.userModel
+    const user = await this.userModel
       .findByIdAndUpdate(id, data, { returnDocument: 'after' })
       .select('-password')
-      .exec() as Promise<UserDocument>;
+      .exec() as UserDocument;
+ 
+    if (!user) throw new NotFoundException('User not found');
+
+    if (data.isVerified === true) {
+      await this.mailService.sendApprovedEmail(user.email, user.firstName, 'https://www.admasterlk.com/login');
+    }
+    return user;
   }
 
   async remove(id: string): Promise<void> {
