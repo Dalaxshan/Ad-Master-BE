@@ -10,9 +10,12 @@ export class User {
   @Prop() address?: string;
   @Prop() district?: string;
   @Prop({ required: true, unique: true }) email!: string;
-  @Prop({ required: true }) phoneNumber: string;
+  @Prop() phoneNumber?: string;
   @Prop({ default: false }) isVerified: boolean;
-  @Prop({ required: true }) password: string;
+  @Prop() password?: string;
+  @Prop() googleId?: string;
+  @Prop() avatar?: string;
+  @Prop({ enum: ['local', 'google'], default: 'local' }) provider?: string;
   @Prop({ type: [{ type: Types.ObjectId, ref: 'Ad' }] }) ads?: Types.ObjectId[];
   @Prop({ enum: ['admin', 'seller', 'customer'], default: 'seller' })
   role!: string;
