@@ -10,7 +10,6 @@ import * as crypto from 'crypto';
 import { UsersService } from '../users/users.service';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { LoginDto } from './dto/login.dto';
-import { GoogleLoginDto } from './dto/google-login.dto';
 import { MailService } from 'src/mail/mail.service';
 
 @Injectable()
@@ -57,53 +56,6 @@ export class AuthService {
     return {
       accessToken: token,
       user: populated,
-    };
-  }
-
-  async validateGoogleUser(dto: GoogleLoginDto, res: Response) {
-    let user = await this.usersService.findByEmail(dto.email);
-
-    if (!user) {
-      user = await this.usersService.create({
-        email: dto.email,
-        name: dto.name,
-        firstName: dto.name?.split(' ')[0] || dto.name,
-        lastName: dto.name?.split(' ').slice(1).join(' ') || '',
-        googleId: dto.googleId,
-        avatar: dto.image,
-        provider: 'google',
-        isVerified: true,
-      } as any);
-    } else if (!user.googleId) {
-      await this.usersService.update(user._id.toString(), {
-        googleId: dto.googleId,
-        avatar: dto.image,
-        isVerified: true,
-      });
-    }
-
-    const payload = {
-      sub: user._id.toString(),
-      email: user.email,
-      role: user.role,
-    };
-
-    const token = this.signToken(user._id.toString(), user.email, user.role);
-    this.setTokenCookie(res, token);
-    return {
-      accessToken: token,
-      refreshToken: this.jwtService.sign(payload, {
-        expiresIn: (process.env.JWT_REFRESH_EXPIRES || '7d') as any,
-      }),
-      user: {
-        id: user._id.toString(),
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        avatar: user.avatar,
-        role: user.role,
-        ads: user.ads,
-      },
     };
   }
 
