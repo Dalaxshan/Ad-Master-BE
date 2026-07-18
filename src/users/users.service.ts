@@ -14,8 +14,8 @@ import { MailService } from 'src/mail/mail.service';
 export class UsersService {
   constructor(
     @InjectModel(User.name) private userModel: Model<UserDocument>,
-    private mailService: MailService
-  ) { }
+    private mailService: MailService,
+  ) {}
 
   async create(dto: CreateUserDto): Promise<UserDocument> {
     const exists = await this.userModel.findOne({ email: dto.email });
@@ -26,6 +26,51 @@ export class UsersService {
     }
     const user = new this.userModel(data);
     return user.save();
+  }
+
+  async createFromGoogle(dto: CreateUserDto): Promise<UserDocument> {
+    const exists = await this.userModel.findOne({ googleId: dto.googleId });
+    if (exists) throw new ConflictException('Google ID already registered');
+    const user = new this.userModel(dto);
+    return user.save();
+  }
+
+  async findByGoogleId(googleId: string): Promise<UserDocument | null> {
+    return this.userModel.findOne({ googleId });
+  }
+
+  async findOrCreateFromGoogle(payload: {
+    googleId: string;
+    email: string;
+    name: string;
+    picture: string;
+  }) {
+    let user = await this.findByGoogleId(payload.googleId);
+
+    if (!user) {
+      user = await this.findByEmail(payload.email);
+      if (user) {
+        // existing email account — link googleId
+        user.googleId = payload.googleId;
+        user.avatar = user.avatar || payload.picture;
+        user.provider = 'google';
+        await user.save();
+      } else {
+        // brand new user
+        user = new this.userModel({
+          googleId: payload.googleId,
+          email: payload.email,
+          name: payload.name,
+          avatar: payload.picture,
+          provider: 'google',
+          role: 'seller',
+          isVerified: true,
+        });
+        await user.save();
+      }
+    }
+
+    return user;
   }
 
   async findByEmail(email: string): Promise<UserDocument | null> {
@@ -47,15 +92,19 @@ export class UsersService {
   }
 
   async update(id: string, data: Partial<User>): Promise<UserDocument> {
-    const user = await this.userModel
+    const user = (await this.userModel
       .findByIdAndUpdate(id, data, { returnDocument: 'after' })
       .select('-password')
-      .exec() as UserDocument;
- 
+      .exec()) as UserDocument;
+
     if (!user) throw new NotFoundException('User not found');
 
     if (data.isVerified === true) {
-      await this.mailService.sendApprovedEmail(user.email, user.firstName, 'https://www.admasterlk.com/login');
+      await this.mailService.sendApprovedEmail(
+        user.email,
+        user.name ?? '',
+        'https://www.admasterlk.com/login',
+      );
     }
     return user;
   }

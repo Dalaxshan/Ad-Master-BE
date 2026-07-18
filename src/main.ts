@@ -5,9 +5,8 @@ import cookieParser from 'cookie-parser';
 import { setServers } from 'node:dns';
 
 async function bootstrap() {
-  setServers(["1.1.1.1", "8.8.8.8"]);
+  setServers(['1.1.1.1', '8.8.8.8']);
 
-  
   const app = await NestFactory.create(AppModule);
   const allowedOrigins = [
     'https://www.admasterlk.com',

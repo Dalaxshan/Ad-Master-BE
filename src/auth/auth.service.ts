@@ -2,6 +2,7 @@ import {
   Injectable,
   UnauthorizedException,
   BadRequestException,
+  NotFoundException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Response } from 'express';
@@ -11,25 +12,62 @@ import { UsersService } from '../users/users.service';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { LoginDto } from './dto/login.dto';
 import { MailService } from 'src/mail/mail.service';
+import { OAuth2Client } from 'google-auth-library';
 
 @Injectable()
 export class AuthService {
+  private googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
   constructor(
     private usersService: UsersService,
     private jwtService: JwtService,
     private mailService: MailService,
   ) {}
 
+  async verifyGoogleToken(idToken: string) {
+    const ticket = await this.googleClient.verifyIdToken({
+      idToken,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+
+    const payload = ticket.getPayload();
+    if (!payload) {
+      throw new UnauthorizedException('Invalid Google token');
+    }
+    return payload;
+  }
+
+  async loginWithGoogle(idToken: string, res: Response) {
+    const payload = await this.verifyGoogleToken(idToken);
+    const user = await this.usersService.findOrCreateFromGoogle({
+      googleId: payload.sub,
+      email: payload.email!,
+      name: payload.name!,
+      picture: payload.picture!,
+    });
+    const { accessToken, refreshToken } = this.generateToken(
+      user._id.toString(),
+      user.email,
+      user.role,
+    );
+
+    return { user, accessToken, refreshToken };
+  }
+
   async register(dto: CreateUserDto, res: Response) {
     if (await this.usersService.findByEmail(dto.email)) {
       throw new BadRequestException('User already exists');
     }
     const user = await this.usersService.create(dto);
-    const token = this.signToken(user._id.toString(), user.email, user.role);
-    this.setTokenCookie(res, token);
+    const { accessToken, refreshToken } = this.generateToken(
+      user._id.toString(),
+      user.email,
+      user.role,
+    );
+    this.setTokenCookie(res, accessToken, refreshToken);
 
     await this.mailService
-      .sendWelcomeEmail(user.email, user.firstName)
+      .sendWelcomeEmail(user.email, user.name ?? '')
       .catch((e) => {
         console.error('Mail send failed:', e.message);
       });
@@ -47,21 +85,35 @@ export class AuthService {
         'Wait for admin to verify your account before logging in',
       );
     if (!valid) throw new UnauthorizedException('Invalid credentials');
-    const token = this.signToken(user._id.toString(), user.email, user.role);
-    this.setTokenCookie(res, token);
+    const { accessToken, refreshToken } = this.generateToken(
+      user._id.toString(),
+      user.email,
+      user.role,
+    );
+
+    //store token in cookie
+    this.setTokenCookie(res, accessToken, refreshToken);
+
     const populated = await user.populate(
       'ads',
       'title description location price images',
     );
     return {
-      accessToken: token,
+      accessToken: accessToken,
+      refreshToken: refreshToken,
       user: populated,
     };
   }
 
   logout(res: Response) {
     const isProduction = process.env.NODE_ENV === 'production';
-    res.clearCookie('token', {
+    res.clearCookie('accessToken', {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: isProduction ? 'none' : 'strict',
+      path: '/',
+    });
+    res.clearCookie('refreshToken', {
       httpOnly: true,
       secure: isProduction,
       sameSite: isProduction ? 'none' : 'strict',
@@ -96,7 +148,8 @@ export class AuthService {
     newPassword: string,
   ) {
     const user = await this.usersService.findById(userId);
-    const valid = await bcrypt.compare(currentPassword, newPassword);
+    if (!user) throw new NotFoundException('User not found');
+    const valid = await bcrypt.compare(currentPassword, user.password ?? '');
     if (!valid)
       throw new UnauthorizedException('Current password is incorrect');
     await this.usersService.changePassword(userId, newPassword);
@@ -107,9 +160,38 @@ export class AuthService {
     return this.jwtService.sign({ sub, email, role });
   }
 
-  private setTokenCookie(res: Response, token: string) {
+  generateToken(userId: string, email: string, role: string) {
+    const accessToken = this.jwtService.sign(
+      { sub: userId, email, role },
+      { secret: process.env.JWT_ACCESS_SECRET, expiresIn: '15m' },
+    );
+    const refreshToken = this.jwtService.sign(
+      { sub: userId, email, role },
+      { secret: process.env.JWT_REFRESH_SECRET, expiresIn: '7d' },
+    );
+    return { accessToken, refreshToken };
+  }
+
+  async refreshAccessToken(userId: string) {
+    const user = await this.usersService.findById(userId);
+    if (!user) throw new UnauthorizedException();
+    return this.generateToken(user._id.toString(), user.email, user.role);
+  }
+
+  private setTokenCookie(
+    res: Response,
+    accessToken: string,
+    refreshToken: string,
+  ) {
     const isProduction = process.env.NODE_ENV === 'production';
-    res.cookie('token', token, {
+    res.cookie('accessToken', accessToken, {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: isProduction ? 'none' : 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+      path: '/',
+    });
+    res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
       secure: isProduction,
       sameSite: isProduction ? 'none' : 'strict',
