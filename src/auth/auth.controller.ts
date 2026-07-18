@@ -1,13 +1,22 @@
 import { Controller, Post, Body, Res, UseGuards, Req } from '@nestjs/common';
-import type { Response } from 'express';
+import type { Request, Response } from 'express';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { LoginDto } from './dto/login.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
-import { JwtAuthGuard } from './guards/jwt-auth-guard';
+import { JwtAuthGuard, JwtRefreshGuard } from './guards/jwt-auth-guard';
 import { GoogleLoginDto } from './dto/google-login.dto';
+
+const isProd = process.env.NODE_ENV === 'production';
+
+const httpOnlyCookieOptions = {
+  httpOnly: true,
+  secure: isProd,
+  sameSite: isProd ? ('none' as const) : ('lax' as const),
+  path: '/',
+};
 
 @Controller('auth')
 export class AuthController {
@@ -22,11 +31,63 @@ export class AuthController {
   }
 
   @Post('google')
-  googleLogin(
+  async googleLogin(
     @Body() dto: GoogleLoginDto,
     @Res({ passthrough: true }) res: Response,
   ) {
-    return this.authService.validateGoogleUser(dto, res);
+    const { user, accessToken, refreshToken } =
+      await this.authService.loginWithGoogle(dto.token, res);
+
+    res.cookie('accessToken', accessToken, {
+      ...httpOnlyCookieOptions,
+      maxAge: 15 * 60 * 1000,
+    });
+
+    res.cookie('refreshToken', refreshToken, {
+      ...httpOnlyCookieOptions,
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
+    // Non-httpOnly so the frontend can read basic profile info for UI
+    res.cookie(
+      'user',
+      JSON.stringify({
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        picture: user.avatar,
+      }),
+      {
+        secure: isProd,
+        sameSite: isProd ? 'none' : 'lax',
+        path: '/',
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+      },
+    );
+
+    return { message: 'Login successful', user };
+  }
+
+  @UseGuards(JwtRefreshGuard)
+  @Post('refresh')
+  async refresh(
+    @Req() req: Request & { user: { userId: string } },
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const userId = req.user.userId;
+    const { accessToken, refreshToken } =
+      await this.authService.refreshAccessToken(userId);
+
+    res.cookie('accessToken', accessToken, {
+      ...httpOnlyCookieOptions,
+      maxAge: 15 * 60 * 1000,
+    });
+    res.cookie('refreshToken', refreshToken, {
+      ...httpOnlyCookieOptions,
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
+    return { message: 'Token refreshed' };
   }
 
   @Post('login')

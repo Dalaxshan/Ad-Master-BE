@@ -10,14 +10,13 @@ import { AdminModule } from './admin/admin.module';
 import { R2Module } from './r2/r2.module';
 import { MailModule } from './mail/mail.module';
 
-
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     MongooseModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
-        uri: config.get<string>('MONGO_URI'),
+        uri: config.get<string>('MONGODB_URI'),
       }),
     }),
     AuthModule,
