@@ -9,7 +9,8 @@ export class MailService {
 
   constructor(private readonly config: ConfigService) {
     this.resend = new Resend(this.config.get<string>('RESEND_API_KEY'));
-    this.from = this.config.get<string>('MAIL_FROM') ?? 'no-reply@admasterlk.com';
+    this.from =
+      this.config.get<string>('MAIL_FROM') ?? 'no-reply@admasterlk.com';
   }
 
   private send(to: string | string[], subject: string, html: string) {
@@ -17,7 +18,10 @@ export class MailService {
   }
 
   async sendWelcomeEmail(to: string, name: string) {
-    await this.send(to, 'Welcome to AdMaster!', `
+    await this.send(
+      to,
+      'Welcome to AdMaster!',
+      `
       <!DOCTYPE html><html><head><style>
         body{font-family:Arial,sans-serif;background:#f4f4f4;margin:0;padding:0}
         .container{max-width:600px;margin:40px auto;background:#fff;border-radius:8px;overflow:hidden}
@@ -40,11 +44,15 @@ export class MailService {
           </div>
           <div class="footer"><p>© 2026 <a href="https://admasterlk.com">Admasterlk.com</a>. All rights reserved.</p></div>
         </div>
-      </body></html>`);
+      </body></html>`,
+    );
   }
 
   async sendApprovedEmail(to: string, name: string, url: string) {
-    await this.send(to, 'Your Account has been Approved', `
+    await this.send(
+      to,
+      'Your Account has been Approved',
+      `
       <!DOCTYPE html><html><head><style>
         body{font-family:Arial,sans-serif;background:#f4f4f4;margin:0;padding:0}
         .container{max-width:600px;margin:40px auto;background:#fff;border-radius:8px;overflow:hidden}
@@ -66,11 +74,15 @@ export class MailService {
           </div>
           <div class="footer"><p>© 2026 <a href="https://www.admasterlk.com">Admasterlk.com</a>. All rights reserved.</p></div>
         </div>
-      </body></html>`);
+      </body></html>`,
+    );
   }
 
   async sendResetPasswordEmail(to: string, resetUrl: string) {
-    await this.send(to, 'Reset Your Password', `
+    await this.send(
+      to,
+      'Reset Your Password',
+      `
       <!DOCTYPE html><html><head><style>
         body{font-family:Arial,sans-serif;background:#f4f4f4;margin:0;padding:0}
         .container{max-width:600px;margin:40px auto;background:#fff;border-radius:8px;overflow:hidden}
@@ -94,11 +106,15 @@ export class MailService {
           </div>
           <div class="footer"><p>© 2026 <a href="https://www.admasterlk.com">Admasterlk.com</a>. All rights reserved.</p></div>
         </div>
-      </body></html>`);
+      </body></html>`,
+    );
   }
 
   async sendApprovedAdEmail(to: string, name: string, url: string) {
-    await this.send(to, 'Your Ad Has Been Approved', `
+    await this.send(
+      to,
+      'Your Ad Has Been Approved',
+      `
       <!DOCTYPE html><html><head><style>
         body{font-family:Arial,sans-serif;background:#f4f4f4;margin:0;padding:0}
         .container{max-width:600px;margin:40px auto;background:#fff;border-radius:8px;overflow:hidden}
@@ -120,11 +136,15 @@ export class MailService {
           </div>
           <div class="footer"><p>© 2026 <a href="https://www.admasterlk.com">Admasterlk.com</a>. All rights reserved.</p></div>
         </div>
-      </body></html>`);
+      </body></html>`,
+    );
   }
 
   async sendNewOrderEmail(name: string, orderId: string) {
-    await this.send('admasterlk1@gmail.com', 'New Order Has Been Received', `
+    await this.send(
+      'admasterlk1@gmail.com',
+      'New Order Has Been Received',
+      `
       <!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"/><style>
         body{margin:0;padding:0;width:100%;background-color:#F0EEF7;font-family:Arial,Helvetica,sans-serif}
       </style></head>
@@ -170,11 +190,15 @@ export class MailService {
             </table>
           </td></tr>
         </table>
-      </body></html>`);
+      </body></html>`,
+    );
   }
 
   async sendOtpEmail(to: string, name: string, otp: string) {
-    await this.send(to, 'Your OTP Code', `
+    await this.send(
+      to,
+      'Your OTP Code',
+      `
       <!DOCTYPE html><html><head><style>
         body{font-family:Arial,sans-serif;background:#f4f4f4;margin:0;padding:0}
         .container{max-width:600px;margin:40px auto;background:#fff;border-radius:8px;padding:40px}
@@ -193,6 +217,7 @@ export class MailService {
           </div>
           <div class="footer"><p>© 2026 Admasterlk.com. All rights reserved.</p></div>
         </div>
-      </body></html>`);
+      </body></html>`,
+    );
   }
 }
