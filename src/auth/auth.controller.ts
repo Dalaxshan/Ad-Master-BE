@@ -38,34 +38,7 @@ export class AuthController {
     const { user, accessToken, refreshToken } =
       await this.authService.loginWithGoogle(dto.token, res);
 
-    res.cookie('accessToken', accessToken, {
-      ...httpOnlyCookieOptions,
-      maxAge: 15 * 60 * 1000,
-    });
-
-    res.cookie('refreshToken', refreshToken, {
-      ...httpOnlyCookieOptions,
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
-
-    // Non-httpOnly so the frontend can read basic profile info for UI
-    res.cookie(
-      'user',
-      JSON.stringify({
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        picture: user.avatar,
-      }),
-      {
-        secure: isProd,
-        sameSite: isProd ? 'none' : 'lax',
-        path: '/',
-        maxAge: 7 * 24 * 60 * 60 * 1000,
-      },
-    );
-
-    return { message: 'Login successful', user };
+    return { message: 'Login successful', accessToken, refreshToken, user };
   }
 
   @UseGuards(JwtRefreshGuard)
