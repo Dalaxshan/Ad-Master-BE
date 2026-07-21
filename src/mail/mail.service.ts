@@ -1,67 +1,87 @@
 import { Injectable } from '@nestjs/common';
-import { MailerService } from '@nestjs-modules/mailer';
+import { Resend } from 'resend';
+import { render } from '@react-email/components';
+import * as React from 'react';
+import WelcomeEmail from './templates/welcome';
+import ResetPasswordEmail from './templates/reset-password';
+import OtpEmail from './templates/otp';
+import NewOrderEmail from './templates/new-order';
+import RegistrationApprovedEmail from './templates/registration-approved';
+import AdApprovedEmail from './templates/ad-approved';
 
 @Injectable()
 export class MailService {
-  constructor(private readonly mailerService: MailerService) {}
+  private resend: Resend;
 
-  // Welcome Email
-  async sendWelcomeEmail(to: string, name: string) {
-    await this.mailerService.sendMail({
-      to,
-      subject: 'Welcome to AdMaster!',
-      template: 'welcome',           
-      context: { name },       
-    });
+  constructor() {
+    this.resend = new Resend(process.env.RESEND_API_KEY);
   }
 
-  // Approved Email
-  async sendApprovedEmail(to: string, name: string, url: string) {
-    await this.mailerService.sendMail({
+  private async send(to: string, subject: string, element: React.ReactElement) {
+    const html = await render(element);
+    const result = await this.resend.emails.send({
+      from: process.env.MAIL_FROM!,
       to,
-      subject: 'Your Account has been Approved',
-      template: 'registration-approved',           
-      context: { name, url },       
+      subject,
+      html,
     });
+    if (result.error) {
+      console.error('Resend error:', result.error);
+      throw new Error(result.error.message);
+    }
+    console.log('Email sent successfully to:', to, '| id:', result.data?.id);
+    return result;
   }
 
-  // Reset Password Email
-  async sendResetPasswordEmail(to: string, resetUrl: string) {
-    await this.mailerService.sendMail({
+  sendWelcome(to: string, name: string) {
+    return this.send(
       to,
-      subject: 'Reset Your Password',
-      template: 'reset-password',     
-      context: {resetUrl, expiry: '15 minutes' },
-    });
+      'Welcome!',
+      React.createElement(WelcomeEmail, { name }),
+    );
   }
 
-  // Approved Ad
-    async sendApprovedAdEmail(to: string, name: string,url: string) {
-    await this.mailerService.sendMail({
+  sendOtp(to: string, code: string) {
+    return this.send(
       to,
-      subject: 'Your Ad Has Been Approved',
-      template: 'ad-approved',           
-      context: { name, url },       
-    });
+      'Your verification code',
+      React.createElement(OtpEmail, { code }),
+    );
   }
 
-  //New Order Email
-  async sendNewOrderEmail( name: string, orderId: string) {
-    await this.mailerService.sendMail({
-      to:'admasterlk1@gmail.com',
-      subject: 'New Order Has Been Received',
-      template: 'new-order',
-      context: { name, orderId },
-    });
+  sendResetPassword(to: string, name: string, resetUrl: string) {
+    return this.send(
+      to,
+      'Reset your password',
+      React.createElement(ResetPasswordEmail, { name, resetUrl }),
+    );
   }
 
-  // OTP Email
-  async sendOtpEmail(to: string, name: string, otp: string) {
-    await this.mailerService.sendMail({
+  sendNewOrder(to: string, order: { orderId: string; total: number }) {
+    return this.send(
       to,
-      subject: 'Your OTP Code',
-      template: 'otp',            
-      context: { name, otp, expiry: '5 minutes' },
-    });
+      `Order #${order.orderId} confirmed`,
+      React.createElement(NewOrderEmail, {
+        name: to.split('@')[0],
+        orderId: order.orderId,
+        total: order.total,
+      }),
+    );
+  }
+
+  sendRegistrationApproved(to: string, name: string) {
+    return this.send(
+      to,
+      'Your registration is approved',
+      React.createElement(RegistrationApprovedEmail, { name }),
+    );
+  }
+
+  sendAdApproved(to: string, adTitle: string) {
+    return this.send(
+      to,
+      'Your ad has been approved',
+      React.createElement(AdApprovedEmail, { adTitle }),
+    );
   }
 }

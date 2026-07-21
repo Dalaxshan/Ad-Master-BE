@@ -166,11 +166,7 @@ export class AdsService {
       { returnDocument: 'after' },
     );
     if (status === 'active') {
-      await this.mailService.sendApprovedAdEmail(
-        ad.seller.email,
-        ad.seller.name ?? '',
-        `https://www.admasterlk.com/ad/${ad.adSlug}`,
-      );
+      await this.mailService.sendAdApproved(ad.seller.email, ad.title);
     }
     return { message: 'Ad status updated successfully' };
   }

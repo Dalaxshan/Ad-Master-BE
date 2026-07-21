@@ -8,7 +8,7 @@ import { MailModule } from 'src/mail/mail.module';
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: Order.name, schema: OrderSchema }]),
-    MailModule
+    MailModule,
   ],
   providers: [OrdersService],
   controllers: [OrdersController],
