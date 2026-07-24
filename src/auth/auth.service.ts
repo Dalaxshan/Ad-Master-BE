@@ -107,7 +107,7 @@ export class AuthService {
   }
 
   logout(res: Response) {
-    const isProduction = process.env.NODE_ENV === 'production';
+    const isProduction ='production';
     res.clearCookie('accessToken', {
       httpOnly: true,
       secure: isProduction,
@@ -187,7 +187,7 @@ export class AuthService {
     accessToken: string,
     refreshToken: string,
   ) {
-    const isProduction = process.env.NODE_ENV === 'production';
+    const isProduction ='production';
     res.cookie('accessToken', accessToken, {
       httpOnly: true,
       secure: isProduction,
