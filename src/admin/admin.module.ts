@@ -12,7 +12,7 @@ import { Admin, AdminSchema } from '../auth/admin.schema';
     JwtModule.registerAsync({
       inject: [ConfigService],
       useFactory: (c: ConfigService) => ({
-        secret: c.get('JWT_SECRET'),
+        secret: c.get('JWT_ACCESS_SECRET'),
         signOptions: { expiresIn: c.get('JWT_EXPIRES_IN') ?? '15m' },
       }),
     }),
