@@ -100,10 +100,9 @@ export class UsersService {
     if (!user) throw new NotFoundException('User not found');
 
     if (data.isVerified === true) {
-      await this.mailService.sendApprovedEmail(
+      await this.mailService.sendRegistrationApproved(
         user.email,
         user.name ?? '',
-        'https://www.admasterlk.com/login',
       );
     }
     return user;

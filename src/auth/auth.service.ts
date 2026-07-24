@@ -11,8 +11,8 @@ import * as crypto from 'crypto';
 import { UsersService } from '../users/users.service';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { LoginDto } from './dto/login.dto';
-import { MailService } from 'src/mail/mail.service';
 import { OAuth2Client } from 'google-auth-library';
+import { MailService } from 'src/mail/mail.service';
 
 @Injectable()
 export class AuthService {
@@ -55,6 +55,7 @@ export class AuthService {
   }
 
   async register(dto: CreateUserDto, res: Response) {
+    const adminEmail = 'admasterlk1@gmail.com';
     if (await this.usersService.findByEmail(dto.email)) {
       throw new BadRequestException('User already exists');
     }
@@ -67,7 +68,7 @@ export class AuthService {
     this.setTokenCookie(res, accessToken, refreshToken);
 
     await this.mailService
-      .sendWelcomeEmail(user.email, user.name ?? '')
+      .sendRegistration(adminEmail, user.name ?? 'User')
       .catch((e) => {
         console.error('Mail send failed:', e.message);
       });
@@ -126,11 +127,14 @@ export class AuthService {
     const token = crypto.randomBytes(32).toString('hex');
     const expires = new Date(Date.now() + 60 * 60 * 1000);
     const user = await this.usersService.setResetToken(email, token, expires);
+
     if (user) {
-      console.log('Sending reset password email to:', email);
-      await this.mailService.sendResetPasswordEmail(email, token).catch((e) => {
-        console.error('Mail send failed:', e.message);
-      });
+      const resetUrl = `${process.env.CLIENT_URL}/reset-password?token=${token}`;
+      await this.mailService.sendResetPassword(
+        email,
+        user.name ?? 'User',
+        resetUrl,
+      );
     }
     return { message: 'If that email exists, a reset link has been sent.' };
   }

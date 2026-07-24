@@ -8,7 +8,6 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 import { UsersModule } from '../users/users.module';
 import { MailModule } from 'src/mail/mail.module';
 
-
 @Module({
   imports: [
     UsersModule,
@@ -20,7 +19,7 @@ import { MailModule } from 'src/mail/mail.module';
         signOptions: { expiresIn: config.get('JWT_EXPIRES_IN') },
       }),
     }),
-    MailModule
+    MailModule,
   ],
   providers: [AuthService, JwtStrategy],
   controllers: [AuthController],

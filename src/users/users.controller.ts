@@ -20,18 +20,20 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Get('me')
+  @UseGuards(JwtAuthGuard)
   getMe(@Req() req) {
     return this.usersService.findById(req.user.userId);
   }
 
   @Patch('me')
+  @UseGuards(JwtAuthGuard)
   updateMe(@Req() req, @Body() body) {
     return this.usersService.update(req.user.userId, body);
   }
 
   @Patch(':id')
-  @UseGuards(RolesGuard)
-  @Roles('admin')
+  // @UseGuards(RolesGuard)
+  // @Roles('admin')
   updateStatus(
     @Param('id') id: string,
     @Body('isVerified') isVerified: boolean,
@@ -41,14 +43,12 @@ export class UsersController {
 
   @Get()
   @UseGuards(RolesGuard)
-  @Roles('admin')
+  // @Roles('admin')
   findAll() {
     return this.usersService.findAll();
   }
 
   @Get(':id')
-  @UseGuards(RolesGuard)
-  @Roles('admin')
   findOne(@Param('id') id: string) {
     return this.usersService.findById(id);
   }

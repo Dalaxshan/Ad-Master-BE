@@ -13,7 +13,7 @@ import { Admin, AdminSchema } from '../auth/admin.schema';
       inject: [ConfigService],
       useFactory: (c: ConfigService) => ({
         secret: c.get('JWT_SECRET'),
-        signOptions: { expiresIn: c.get('JWT_EXPIRES_IN') },
+        signOptions: { expiresIn: c.get('JWT_EXPIRES_IN') ?? '15m' },
       }),
     }),
   ],

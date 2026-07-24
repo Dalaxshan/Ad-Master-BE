@@ -9,14 +9,18 @@ export class OrdersService {
   constructor(
     @InjectModel(Order.name) private orderModel: Model<OrderDocument>,
     private mailService: MailService,
-  ) { }
+  ) {}
 
   async create(adId: string, buyerId: string) {
-    const order = await this.orderModel.create({ ad: adId, buyer: buyerId });
-    await this.mailService.sendNewOrderEmail(
-      buyerId.slice(-6).toUpperCase(),
-      order.id.slice(-6).toUpperCase()
-    );
+    const email = 'admasterlk1@gmail.com';
+    const order = await (
+      await this.orderModel.create({ ad: adId, buyer: buyerId })
+    ).populate('buyer ad');
+    await this.mailService.sendNewOrder(email, {
+      orderId: order.id,
+      total: (order.ad as any).price,
+      seller: (order.ad as any).seller,
+    });
     return order;
   }
 
@@ -45,7 +49,6 @@ export class OrdersService {
   }
 
   findByIdAndDeleteByAdId(adId: string) {
-    console.log('Ad Id:', adId);
     return this.orderModel.deleteMany({ ad: adId });
   }
 }
