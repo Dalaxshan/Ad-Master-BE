@@ -9,14 +9,7 @@ import { ChangePasswordDto } from './dto/change-password.dto';
 import { JwtAuthGuard, JwtRefreshGuard } from './guards/jwt-auth-guard';
 import { GoogleLoginDto } from './dto/google-login.dto';
 
-const isProd = process.env.NODE_ENV === 'production';
 
-const httpOnlyCookieOptions = {
-  httpOnly: true,
-  secure: isProd,
-  sameSite: isProd ? ('none' as const) : ('lax' as const),
-  path: '/',
-};
 
 @Controller('auth')
 export class AuthController {
@@ -51,12 +44,20 @@ export class AuthController {
     const { accessToken, refreshToken } =
       await this.authService.refreshAccessToken(userId);
 
+    const isProd = process.env.NODE_ENV === 'production';
+    const cookieOptions = {
+      httpOnly: true,
+      secure: isProd,
+      sameSite: isProd ? ('none' as const) : ('lax' as const),
+      path: '/',
+    };
+
     res.cookie('accessToken', accessToken, {
-      ...httpOnlyCookieOptions,
+      ...cookieOptions,
       maxAge: 15 * 60 * 1000,
     });
     res.cookie('refreshToken', refreshToken, {
-      ...httpOnlyCookieOptions,
+      ...cookieOptions,
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
