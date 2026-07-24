@@ -17,7 +17,7 @@ export default function AdApprovedEmail({ adTitle }: AdApprovedEmailProps) {
   return (
     <Html>
       <Head />
-      <Preview>Your ad has been approved</Preview>
+      <Preview>Your Ad has been Approved</Preview>
       <Body>
         <Container>
           <Heading>Your ad has been approved!</Heading>

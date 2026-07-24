@@ -1,5 +1,6 @@
 import {
   Body,
+  Button,
   Container,
   Head,
   Heading,
@@ -10,25 +11,41 @@ import {
 import * as React from 'react';
 
 interface NewOrderEmailProps {
-  name: string;
   orderId: string;
   total: number;
+  seller?: string;
 }
 
 export default function NewOrderEmail({
-  name,
   orderId,
   total,
+  seller,
 }: NewOrderEmailProps) {
   return (
     <Html>
       <Head />
-      <Preview>New order received</Preview>
+      <Preview>New Order has been Received</Preview>
       <Body>
         <Container>
-          <Heading>Hello, {name}!</Heading>
-          <Text>We've received your order with ID: {orderId}</Text>
-          <Text>Total amount: ${total.toFixed(2)}</Text>
+          <Heading>Hi there!</Heading>
+          <Text>
+            We've received new order with Order ID: #{orderId} placed by Buyer:
+            #{seller}
+          </Text>
+          <Text>Total amount: LKR {total.toFixed(2)}</Text>
+
+          <Button
+            href="https://admin.admasterlk.com/dashboard/orders"
+            style={{
+              backgroundColor: '#012f6b',
+              color: 'white',
+              padding: '10px 20px',
+              textDecoration: 'none',
+              borderRadius: '5px',
+            }}
+          >
+            Go to Admin Panel
+          </Button>
         </Container>
       </Body>
     </Html>

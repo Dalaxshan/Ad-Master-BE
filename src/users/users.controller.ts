@@ -43,7 +43,7 @@ export class UsersController {
 
   @Get()
   @UseGuards(RolesGuard)
-  @Roles('admin')
+  // @Roles('admin')
   findAll() {
     return this.usersService.findAll();
   }

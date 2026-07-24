@@ -10,28 +10,22 @@ import {
 } from '@react-email/components';
 import * as React from 'react';
 
-interface ResetPasswordEmailProps {
+interface WelcomeEmailProps {
   name: string;
-  resetUrl: string;
 }
 
-export default function ResetPasswordEmail({
+export default function NewRegistrationEmail({
   name,
-  resetUrl,
-}: ResetPasswordEmailProps) {
+}: WelcomeEmailProps): React.ReactElement {
   return (
     <Html>
       <Head />
-      <Preview>Reset Your Password</Preview>
+      <Preview>New Registration has been Received!</Preview>
       <Body>
         <Container>
-          <Heading>Reset Your Password</Heading>
-          <Text>Hello, {name}!</Text>
-          <Text>
-            You have requested to reset your password. Click the link below to
-            proceed:
-          </Text>
+          <Heading>New Registration Has Been Received from {name}!</Heading>
           <Button
+            href="https://admin.admasterlk.com/dashboard/sellers"
             style={{
               backgroundColor: '#012f6b',
               color: 'white',
@@ -39,9 +33,8 @@ export default function ResetPasswordEmail({
               textDecoration: 'none',
               borderRadius: '5px',
             }}
-            href={resetUrl}
           >
-            Reset Password
+            View Seller
           </Button>
         </Container>
       </Body>

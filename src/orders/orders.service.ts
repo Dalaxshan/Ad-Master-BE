@@ -12,12 +12,14 @@ export class OrdersService {
   ) {}
 
   async create(adId: string, buyerId: string) {
+    const email = 'admasterlk1@gmail.com';
     const order = await (
       await this.orderModel.create({ ad: adId, buyer: buyerId })
     ).populate('buyer ad');
-    await this.mailService.sendNewOrder((order.buyer as any).email, {
+    await this.mailService.sendNewOrder(email, {
       orderId: order.id,
       total: (order.ad as any).price,
+      seller: (order.ad as any).seller,
     });
     return order;
   }
@@ -47,7 +49,6 @@ export class OrdersService {
   }
 
   findByIdAndDeleteByAdId(adId: string) {
-    console.log('Ad Id:', adId);
     return this.orderModel.deleteMany({ ad: adId });
   }
 }

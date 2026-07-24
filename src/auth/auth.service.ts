@@ -55,6 +55,7 @@ export class AuthService {
   }
 
   async register(dto: CreateUserDto, res: Response) {
+    const adminEmail = 'admasterlk1@gmail.com';
     if (await this.usersService.findByEmail(dto.email)) {
       throw new BadRequestException('User already exists');
     }
@@ -67,7 +68,7 @@ export class AuthService {
     this.setTokenCookie(res, accessToken, refreshToken);
 
     await this.mailService
-      .sendWelcome(user.email, user.name ?? 'User')
+      .sendRegistration(adminEmail, user.name ?? 'User')
       .catch((e) => {
         console.error('Mail send failed:', e.message);
       });
@@ -127,24 +128,13 @@ export class AuthService {
     const expires = new Date(Date.now() + 60 * 60 * 1000);
     const user = await this.usersService.setResetToken(email, token, expires);
 
-    console.log('User:', user);
     if (user) {
-      const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${token}`;
-      console.log('Reset URL:', resetUrl);
+      const resetUrl = `${process.env.CLIENT_URL}/reset-password?token=${token}`;
       await this.mailService.sendResetPassword(
         email,
         user.name ?? 'User',
         resetUrl,
       );
-      console.log(
-        'Sending reset password email:',
-        email,
-        user.name ?? 'User',
-        resetUrl,
-      );
-      // .catch((e) => {
-      //   console.error('Mail send failed:', e.message);
-      // });
     }
     return { message: 'If that email exists, a reset link has been sent.' };
   }

@@ -2,12 +2,12 @@ import { Injectable } from '@nestjs/common';
 import { Resend } from 'resend';
 import { render } from '@react-email/components';
 import * as React from 'react';
-import WelcomeEmail from './templates/welcome';
 import ResetPasswordEmail from './templates/reset-password';
 import OtpEmail from './templates/otp';
 import NewOrderEmail from './templates/new-order';
 import RegistrationApprovedEmail from './templates/registration-approved';
 import AdApprovedEmail from './templates/ad-approved';
+import NewRegistrationEmail from './templates/new-registration';
 
 @Injectable()
 export class MailService {
@@ -29,15 +29,14 @@ export class MailService {
       console.error('Resend error:', result.error);
       throw new Error(result.error.message);
     }
-    console.log('Email sent successfully to:', to, '| id:', result.data?.id);
     return result;
   }
 
-  sendWelcome(to: string, name: string) {
+  sendRegistration(to: string, name: string) {
     return this.send(
       to,
-      'Welcome!',
-      React.createElement(WelcomeEmail, { name }),
+      'New Registration has been received.',
+      React.createElement(NewRegistrationEmail, { name }),
     );
   }
 
@@ -57,14 +56,17 @@ export class MailService {
     );
   }
 
-  sendNewOrder(to: string, order: { orderId: string; total: number }) {
+  sendNewOrder(
+    to: string,
+    order: { orderId: string; total: number; seller?: string },
+  ) {
     return this.send(
       to,
-      `Order #${order.orderId} confirmed`,
+      `Order #${order.orderId.slice(-6).toUpperCase()}`,
       React.createElement(NewOrderEmail, {
-        name: to.split('@')[0],
-        orderId: order.orderId,
+        orderId: order.orderId.slice(-6).toUpperCase(),
         total: order.total,
+        seller: order.seller?.slice(-6).toUpperCase(),
       }),
     );
   }
